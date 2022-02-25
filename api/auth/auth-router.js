@@ -1,6 +1,11 @@
 const router = require('express').Router();
 
-router.post('/register', (req, res) => {
+const User = require('../users/users-model')
+const checkRegisterUsernameTaken = require('../middleware/checkRegisterUsernameTaken');
+const validateUser = require('../middleware/validateUser');
+const checkLoginUsernameExists = require('../middleware/checkLoginUsernameExists');
+
+router.post('/register', validateUser, checkRegisterUsernameTaken, (req, res) => {
   res.end('implement register, please!');
   /*
     IMPLEMENT
@@ -29,7 +34,7 @@ router.post('/register', (req, res) => {
   */
 });
 
-router.post('/login', (req, res) => {
+router.post('/login', validateUser, checkLoginUsernameExists, (req, res) => {
   res.end('implement login, please!');
   /*
     IMPLEMENT
