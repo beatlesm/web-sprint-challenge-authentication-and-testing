@@ -4,7 +4,9 @@ describe('test the sanity & environment', () => {
   test('[1] sanity', () => {
     expect(true).toBe(true)
   })  
-  test.todo('[2] NODE_ENV is correct')
+  test('[2] NODE_ENV is correct', () => {
+    expect(process.env.NODE_ENV).toBe('testing');    
+  })
 })
 
 beforeAll(async () => {
