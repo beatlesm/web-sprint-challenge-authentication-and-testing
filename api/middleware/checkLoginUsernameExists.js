@@ -1,12 +1,23 @@
 const { findBy } = require('../users/users-model')
 
 module.exports = async (req, res, next) => {
-    /*
-      On FAILED registration due to the `username` being taken
-      status 422
+    /*      
+      On FAILED login due to `username` not existing in the db
+      status 401
       {
-        "message": "username taken"
+        "message": "invalid credentials"
       }
     */
-    next()
+      try {
+        const [user] = await findBy ({username: req.body.username})
+        if(!user) {
+          next ({status: 401, message: 'invalid credentials'})        
+        } else {
+          req.user = user
+          next()
+        }
+        
+      } catch(err) {
+        next(err)
+      }
   }

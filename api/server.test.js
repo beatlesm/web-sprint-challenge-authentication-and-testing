@@ -1,4 +1,14 @@
+const request = require('supertest')
+const server = require('./server')
 const db = require('../data/dbConfig')
+
+const jokes = require("./jokes/jokes-data");
+const bcrypt = require("bcryptjs")
+const { BCRYPT_ROUNDS } = require("../secret")
+
+const validAuthOne = { username: "Captain Marvel", password: "1234" }
+const invalidAuthOne = { username: "", password: "1234" };
+const invalidAuthTwo = { username: "Captain Marvel", password: "" };
 
 describe('test the sanity & environment', () => {
   test('[1] sanity', () => {
@@ -9,7 +19,7 @@ describe('test the sanity & environment', () => {
   })
 })
 
-beforeAll(async () => {
+beforeEach(async () => {
   await db.migrate.rollback()
   await db.migrate.latest()
 })
@@ -17,7 +27,22 @@ afterAll(async () => {
   await db.destroy()
 })
 
-describe('GET /api/jokes', () => {
-  it.todo('[3] no token cannot see jokes');
-  it.todo('[4] no valid token can see jokes');
+describe('[POST] /api/auth/login', () => {
+  beforeEach(async () => {
+    const hash = bcrypt.hashSync(validAuthOne.password, Number(BCRYPT_ROUNDS));
+    await db("users").insert({
+      username: validAuthOne.username,
+      password: hash,
+    });
+  });
+  it ('[3] valid token can login', async () => {
+    const res = await request(server)
+      .post("/api/auth/login")
+      .send(validAuthOne);
+    expect(res.body.message).toBe("welcome, Captain Marvel");
+  });
+  
 });
+
+
+

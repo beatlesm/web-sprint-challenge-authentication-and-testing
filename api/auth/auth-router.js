@@ -1,3 +1,5 @@
+
+const bcrypt = require('bcryptjs')
 const router = require('express').Router();
 
 const User = require('../users/users-model')
@@ -5,8 +7,11 @@ const checkRegisterUsernameTaken = require('../middleware/checkRegisterUsernameT
 const validateUser = require('../middleware/validateUser');
 const checkLoginUsernameExists = require('../middleware/checkLoginUsernameExists');
 
-router.post('/register', validateUser, checkRegisterUsernameTaken, (req, res) => {
-  res.end('implement register, please!');
+const { BCRYPT_ROUNDS } = require('../../secret')
+const { JWT_SECRET } = require("../../secret");
+const jwt = require('jsonwebtoken')
+
+router.post('/register', validateUser, checkRegisterUsernameTaken, (req, res, next) => {
   /*
     IMPLEMENT
     You are welcome to build additional middlewares to help with the endpoint's functionality.
@@ -32,10 +37,20 @@ router.post('/register', validateUser, checkRegisterUsernameTaken, (req, res) =>
     4- On FAILED registration due to the `username` being taken,
       the response body should include a string exactly as follows: "username taken".
   */
+  let user = req.body  
+
+  const hash = bcrypt.hashSync(user.password, Number(BCRYPT_ROUNDS))
+  user.password = hash  
+
+  User.add(user)
+    .then(saved => {
+      res.status(201).json(saved)
+    })
+    .catch(next) 
+
 });
 
-router.post('/login', validateUser, checkLoginUsernameExists, (req, res) => {
-  res.end('implement login, please!');
+router.post('/login', validateUser, checkLoginUsernameExists, (req, res, next) => {  
   /*
     IMPLEMENT
     You are welcome to build additional middlewares to help with the endpoint's functionality.
@@ -59,6 +74,28 @@ router.post('/login', validateUser, checkLoginUsernameExists, (req, res) => {
     4- On FAILED login due to `username` not existing in the db, or `password` being incorrect,
       the response body should include a string exactly as follows: "invalid credentials".
   */
+if (bcrypt.compareSync(req.body.password, req.user.password)) {
+  const token = builderToken(req.user)
+  res.json({
+    message: `welcome, ${req.user.username}`,
+    "token": token
+  })
+  } else {
+    next ({status: 401, message: 'Invalid credentials'})
+  }
 });
+
+function builderToken(user) {
+  const payload = {
+    subject: user.id,
+    username: user.username    
+  }
+  const options = {
+    expiresIn: '1d',
+  }
+  const token = jwt.sign(payload, JWT_SECRET, options)
+
+  return token
+}
 
 module.exports = router;

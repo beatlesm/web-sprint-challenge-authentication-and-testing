@@ -6,5 +6,10 @@ module.exports = (req, res, next) => {
         "message": "username and password required"
       }
     */
-    next()
+    const { username, password } = req.body
+    if (username && username.trim() && password && password.trim()) {
+      next()      
+    } else {        
+      next({status: 422, message: 'username and password required'})
+    }
   }
