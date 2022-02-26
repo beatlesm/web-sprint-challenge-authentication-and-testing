@@ -69,3 +69,19 @@ describe('[POST] /api/auth/register', () => {
   });
 })
 
+describe('GET /api/jokes', () => {
+  beforeEach(async () => {
+    const hash = bcrypt.hashSync('1234', 8);
+    await db("users").insert({
+      username: validAuthOne.username,
+      password: hash,
+    });
+  });
+  it ('[8] no token cannot see jokes', async () => {
+    const res = await request(server).get("/api/jokes");
+    expect(res.body.message).toBe("Token required");
+  });
+  
+});
+
+
