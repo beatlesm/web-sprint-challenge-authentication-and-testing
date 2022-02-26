@@ -19,7 +19,7 @@ describe('test the sanity & environment', () => {
   })
 })
 
-beforeAll(async () => {
+beforeEach(async () => {
   await db.migrate.rollback()
   await db.migrate.latest()
 })
@@ -71,7 +71,7 @@ describe('[POST] /api/auth/register', () => {
 
 describe('GET /api/jokes', () => {
   beforeEach(async () => {
-    const hash = bcrypt.hashSync('1234', 8);
+    const hash = bcrypt.hashSync(validAuthOne.password, Number(BCRYPT_ROUNDS));
     await db("users").insert({
       username: validAuthOne.username,
       password: hash,
@@ -81,7 +81,16 @@ describe('GET /api/jokes', () => {
     const res = await request(server).get("/api/jokes");
     expect(res.body.message).toBe("Token required");
   });
-  
+  it('[9] valid token can see jokes', async () => {
+    let res = await request(server)
+      .post("/api/auth/login")
+      .send(validAuthOne);
+    res = await request(server)
+      .get("/api/jokes")
+      .set("Authorization", res.body.token);
+    expect(res.body).toMatchObject(jokes);
+  });
 });
+
 
 
