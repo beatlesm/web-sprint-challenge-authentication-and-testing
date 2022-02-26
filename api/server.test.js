@@ -41,7 +41,12 @@ describe('[POST] /api/auth/login', () => {
       .send(validAuthOne);
     expect(res.body.message).toBe("welcome, Captain Marvel");
   });
-  
+  it ('[4] without password cannot login', async () => {
+    const res = await request(server)
+      .post("/api/auth/login")
+      .send(invalidAuthTwo)
+    expect(res.body.message).toBe("username and password required");    
+  });
 });
 
 
