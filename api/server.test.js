@@ -49,5 +49,13 @@ describe('[POST] /api/auth/login', () => {
   });
 });
 
-
+describe('[POST] /api/auth/register', () => {
+  it("[5] returns error if no username", async () => {
+    const res = await request(server)
+      .post("/api/auth/register")
+      .send(invalidAuthOne);
+    expect(res.body.message).toBe("username and password required");
+  })
+  
+})
 
