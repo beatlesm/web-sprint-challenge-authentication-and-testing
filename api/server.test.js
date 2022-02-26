@@ -62,6 +62,10 @@ describe('[POST] /api/auth/register', () => {
       .send(invalidAuthTwo);
     expect(res.body.message).toBe("username and password required");
   });
-  
+  it("[7] successfully creates account", async () => {
+    await request(server).post("/api/auth/register").send(validAuthOne);
+    const [user] = await db("users").where({ username: validAuthOne.username });
+    expect(user).toMatchObject({ username: "Captain Marvel" });
+  });
 })
 
