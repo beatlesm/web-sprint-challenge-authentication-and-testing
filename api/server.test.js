@@ -19,7 +19,7 @@ describe('test the sanity & environment', () => {
   })
 })
 
-beforeEach(async () => {
+beforeAll(async () => {
   await db.migrate.rollback()
   await db.migrate.latest()
 })
@@ -56,6 +56,12 @@ describe('[POST] /api/auth/register', () => {
       .send(invalidAuthOne);
     expect(res.body.message).toBe("username and password required");
   })
+  it("[6] returns error if no password", async () => {
+    const res = await request(server)
+      .post("/api/auth/register")
+      .send(invalidAuthTwo);
+    expect(res.body.message).toBe("username and password required");
+  });
   
 })
 
